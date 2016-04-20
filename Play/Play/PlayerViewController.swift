@@ -20,6 +20,8 @@ class PlayerViewController: UIViewController {
     var playPauseButton: UIButton!
     var nextButton: UIButton!
     var previousButton: UIButton!
+    var scrubber: UISlider!
+    var scrubberDisplayLink : CADisplayLink! = nil
     
     var artistLabel: UILabel!
     var titleLabel: UILabel!
@@ -104,6 +106,13 @@ class PlayerViewController: UIViewController {
         nextButton.addTarget(self, action: "nextTrackTapped:",
             forControlEvents: UIControlEvents.TouchUpInside)
         view.addSubview(nextButton)
+        
+        scrubber = UISlider()
+        scrubber.frame = CGRectMake(0 + width / 15.0,
+                                    width + offset * 0.35,
+                                    width - width / 7.5,
+                                    width / 15.0)
+        view.addSubview(scrubber)
 
     }
 
@@ -131,8 +140,7 @@ class PlayerViewController: UIViewController {
         let url = NSURL(string: "https://api.soundcloud.com/tracks/\(track.id)/stream?client_id=\(clientID)")!
         // FILL ME IN
         if player.currentItem == nil {              // Checks if the song is being played for the first time
-            let song = AVPlayerItem(URL: url)
-            player = AVPlayer(playerItem: song)
+            player = AVPlayer(URL: url)
             player.play()
             sender.selected = true
         } else {
@@ -143,9 +151,21 @@ class PlayerViewController: UIViewController {
             }
             sender.selected = !sender.selected
         }
-        print(track.title + " is being played")
+        
+//        scrubberDisplayLink = CADisplayLink(target: self, selector: Selector("trackAudio"))
+//        scrubberDisplayLink.frameInterval = 1
+//        scrubberDisplayLink.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
+//        scrubber.minimumValue = 0.00
+        
+//        var normalizedTime = Float(player.currentTime())
+//        scrubber.value = normalizedTime
     
     }
+    
+//    func trackAudio() {
+//        var normalizedTime = Float(player.currentTime * 100.0 / player.duration)
+//        scrubber.value = normalizedTime
+//    }
     
     /* 
      * Called when the next button is tapped. It should check if there is a next
@@ -160,13 +180,10 @@ class PlayerViewController: UIViewController {
             let clientID = NSDictionary(contentsOfFile: path!)?.valueForKey("client_id") as! String
             let track = tracks[currentIndex]
             let url = NSURL(string: "https://api.soundcloud.com/tracks/\(track.id)/stream?client_id=\(clientID)")!
-            let song = AVPlayerItem(URL: url)
-            player = AVPlayer(playerItem: song)
+            player = AVPlayer(URL: url)
             player.play()
             sender.selected = true
             loadTrackElements()
-            loadVisualElements()
-            print(track.title + " is being played")
         }
     }
 
@@ -181,20 +198,18 @@ class PlayerViewController: UIViewController {
      */
 
     func previousTrackTapped(sender: UIButton) {
-        if currentIndex - 1 >= 0 {
-            currentIndex = currentIndex - 1
-            let path = NSBundle.mainBundle().pathForResource("Info", ofType: "plist")
-            let clientID = NSDictionary(contentsOfFile: path!)?.valueForKey("client_id") as! String
-            let track = tracks[currentIndex]
-            let url = NSURL(string: "https://api.soundcloud.com/tracks/\(track.id)/stream?client_id=\(clientID)")!
-            let song = AVPlayerItem(URL: url)
-            player = AVPlayer(playerItem: song)
-            player.play()
-            sender.selected = true
-            loadTrackElements()
-            loadVisualElements()
-            print(track.title + " is being played")
+        if (player.currentTime().seconds > 3) && (currentIndex > 0) {
+            currentIndex = currentIndex - 1;
         }
+        print(player.currentTime().seconds)
+        let path = NSBundle.mainBundle().pathForResource("Info", ofType: "plist")
+        let clientID = NSDictionary(contentsOfFile: path!)?.valueForKey("client_id") as! String
+        let track = tracks[currentIndex]
+        let url = NSURL(string: "https://api.soundcloud.com/tracks/\(track.id)/stream?client_id=\(clientID)")!
+        player = AVPlayer(URL : url)
+        player.play()
+        sender.selected = true
+        loadTrackElements()
     }
     
     
