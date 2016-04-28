@@ -198,7 +198,7 @@ class PlayerViewController: UIViewController {
      */
 
     func previousTrackTapped(sender: UIButton) {
-        if (player.currentTime().seconds > 3) && (currentIndex > 0) {
+        if (player.currentTime().seconds <= 3) && (currentIndex > 0) {
             currentIndex = currentIndex - 1;
         }
         print(player.currentTime().seconds)
